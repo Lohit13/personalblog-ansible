@@ -1,0 +1,91 @@
+---
+#setting up the virtual environment
+
+- name: make directory to hold virtual env
+  file: path=/home/"{{user}}" state=directory
+  sudo: true
+
+- name: install python-setuptools
+  apt: name=python-setuptools state=present
+  sudo: true
+
+- name: install python-dev
+  apt: name=python-dev state=present
+  sudo: true
+
+- name: install build-essential
+  apt: name=build-essential state=present
+  sudo: true
+
+- name: install python-pip
+  apt: name=python-pip state=present
+  sudo: true
+
+- name: install virtualenv
+  pip: name=virtualenv
+  sudo: true
+
+- name: create a virtualenv to hold the app
+  shell: virtualenv /home/"{{user}}"/blog
+  sudo: true
+
+- name: give write permissions to user
+  file: path=/home/"{{user}}"/blog owner=root mode=777
+  sudo: true
+
+- name: recursive file permissions
+  sudo: true
+  shell: chmod -R 777 /home/"{{user}}"/blog
+
+- name: install git
+  apt: name=git state=present
+  sudo: true
+
+- name: get the app from git
+  git: repo=https://github.com/Lohit13/PersonalBlog dest=/home/"{{user}}"/blog/PersonalBlog accept_hostkey=True force=yes
+  sudo: true
+
+- name: install requirements inside virtualenv
+  pip: requirements=/home/"{{user}}"/blog/PersonalBlog/requirements.txt virtualenv=/home/"{{user}}"/blog
+
+- name: install uwsgi inside virtualenv
+  pip: name=uwsgi virtualenv=/home/"{{user}}"/blog
+
+- name: install nginx
+  apt: name=nginx
+  sudo: true
+
+- name: start nginx
+  shell: sudo /etc/init.d/nginx start
+
+- name: copy uwsgi_params to server
+  copy: src=./../files/uwsgi_params dest=/home/{{user}}/blog/PersonalBlog/uwsgi_params mode=0644
+
+- name: copy nginx.conf to server
+  copy: src=./../files/site_nginx.conf dest=/home/{{user}}/blog/PersonalBlog/site_nginx.conf mode=0644
+
+- name: link nginx conf file to sites-enabled
+  shell: sudo ln -s /home/{{user}}/blog/PersonalBlog/site_nginx.conf /etc/nginx/sites-enabled/
+
+- name: django collectstatic
+  django_manage: command=collectstatic virtualenv=/home/"{{user}}"/blog app_path=/home/{{user}}/blog/PersonalBlog
+
+- name: django migrate
+  django_manage: command=migrate virtualenv=/home/"{{user}}"/blog app_path=/home/{{user}}/blog/PersonalBlog
+
+- name: restart nginx
+  shell: sudo /etc/init.d/nginx restart
+
+- name: copy uwsgi ini file
+  copy: src=./../files/site_uwsgi.ini dest=/home/{{user}}/blog/PersonalBlog/site_uwsgi.ini mode=0644
+
+- name: copy activating file helper
+  template: src=./../files/exec dest=/home/{{user}}/blog/PersonalBlog/exec mode=755
+
+- name: activate virtualenv and launch website
+  command: /home/{{user}}/blog/PersonalBlog/exec uwsgi --ini /home/{{user}}/blog/PersonalBlog/site_uwsgi.ini
+
+
+
+
+

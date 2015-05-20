@@ -1,0 +1,8 @@
+---
+- hosts: testserver
+  remote_user: root
+  tasks:
+    - name: test connection
+      ping:
+
+    - include: ./tasks/setup.yml user=lohit
