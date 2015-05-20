@@ -13,10 +13,10 @@ We only need ansible to be installed the machine. Refer: http://docs.ansible.com
 
 On Ubuntu, it is as follows:
 
--sudo apt-get install software-properties-common
--sudo apt-add-repository ppa:ansible/ansible
--sudo apt-get update
--sudo apt-get install ansible
+- sudo apt-get install software-properties-common
+- sudo apt-add-repository ppa:ansible/ansible
+- sudo apt-get update
+- sudo apt-get install ansible
 
 USAGE
 ===
