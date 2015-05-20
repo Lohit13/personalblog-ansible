@@ -1,4 +1,6 @@
 ---
+#setting up the virtual environment
+
 - name: make directory to hold virtual env
   file: path=/home/"{{user}}" state=directory
   sudo: true
